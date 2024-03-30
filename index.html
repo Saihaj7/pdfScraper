@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to CSV Converter</title>
+</head>
+<body>
+    <h1>PDF to CSV Converter</h1>
+    <form id="pdfForm" enctype="multipart/form-data">
+        <label for="pdfFile">Select a PDF file:</label>
+        <input type="file" id="pdfFile" name="pdfFile" accept=".pdf">
+        <button type="button" onclick="convertToCSV()">Convert to CSV</button>
+    </form>
+
+    <div id="csvLink" style="display: none;">
+        <p>Conversion complete!</p>
+        <a id="downloadLink" href="#" download="converted_data.csv">Download CSV</a>
+    </div>
+
+    <script>
+        function convertToCSV() {
+            var formData = new FormData();
+            var fileInput = document.getElementById('pdfFile');
+            var file = fileInput.files[0];
+            formData.append('pdfFile', file);
+
+            fetch('http://127.0.0.1:5000/convert', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                }
+                throw new Error('Network response was not ok.');
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(new Blob([blob]));
+                const link = document.getElementById('downloadLink');
+                link.href = url;
+                document.getElementById('csvLink').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('There has been a problem with your fetch operation:', error);
+            });
+        }
+    </script>
+</body>
+</html>
